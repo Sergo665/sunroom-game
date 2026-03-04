@@ -143,12 +143,14 @@ const App = (() => {
             attemptsSection.classList.add('hidden');
         }
 
-        // Отправка в Google Sheets
-        if (Prizes.isGameOver() && !Prizes.isDataSent()) {
-            const data = Prizes.getSubmitData();
-            Sheets.submit(data).then(() => {
-                Prizes.markDataSent();
-            });
+        // Отправка в Google Sheets — после каждой попытки
+        // (чтобы не потерять данные, если игрок закроет страницу)
+        const data = Prizes.getSubmitData();
+        data.attempt = Prizes.getAttemptsUsed();
+        data.attemptsLeft = result.attemptsLeft;
+        Sheets.submit(data);
+        if (Prizes.isGameOver()) {
+            Prizes.markDataSent();
         }
     }
 

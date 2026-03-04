@@ -143,10 +143,11 @@ const App = (() => {
             attemptsSection.classList.add('hidden');
         }
 
-        // Отправка в Google Sheets — один раз после последней попытки
-        if (Prizes.isGameOver() && !Prizes.isDataSent()) {
+        // Отправка в Google Sheets — после каждой попытки (без дублей)
+        const currentAttempt = Prizes.getAttemptsUsed();
+        if (currentAttempt > Prizes.getLastSentAttempt()) {
             const data = Prizes.getSubmitData();
-            Prizes.markDataSent(); // сразу помечаем, чтобы не дублировать
+            Prizes.markAttemptSent(currentAttempt);
             Sheets.submit(data);
         }
     }

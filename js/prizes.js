@@ -31,6 +31,7 @@ const Prizes = (() => {
             userName: '',
             userPhone: '',
             dataSent: false,
+            lastSentAttempt: 0, // номер последней отправленной попытки
         };
     }
 
@@ -140,6 +141,15 @@ const Prizes = (() => {
             return state.dataSent;
         },
 
+        getLastSentAttempt() {
+            return state.lastSentAttempt || 0;
+        },
+
+        markAttemptSent(num) {
+            state.lastSentAttempt = num;
+            saveState();
+        },
+
         isGameOver() {
             return state.attemptsUsed >= MAX_ATTEMPTS;
         },
@@ -153,6 +163,7 @@ const Prizes = (() => {
                 userName: '',
                 userPhone: '',
                 dataSent: false,
+                lastSentAttempt: 0,
             };
             saveState();
         },

@@ -127,7 +127,7 @@ const Prizes = (() => {
                 score: result.score,
                 prize: result.prize,
                 promoCode: result.promoCode,
-                date: new Date().toISOString(),
+                date: new Date().toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' }),
             };
         },
 

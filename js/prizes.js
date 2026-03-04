@@ -123,7 +123,7 @@ const Prizes = (() => {
             const result = this.getResult();
             return {
                 name: state.userName,
-                phone: state.userPhone,
+                phone: state.userPhone.replace(/^\+/, ''),
                 score: result.score,
                 prize: result.prize,
                 promoCode: result.promoCode,

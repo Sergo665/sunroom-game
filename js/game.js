@@ -42,24 +42,23 @@ const Game = (() => {
         veinColor: 'rgba(255,50,50,0.2)', glow: '#ff3333', isBomb: true,
     };
 
-    // Фазы сложности — ХАРДКОР через ловушки, не через скорость
-    // Скорость умеренная (можно успеть нажать), но:
-    // - много крэков и бомб (нужно выбирать)
-    // - камни уменьшаются (труднее попасть)
-    // - камни исчезают (fadeTime — сек. до исчезновения, 0 = не исчезает)
+    // Фазы сложности — логическая, не рефлексная
+    // Скорость комфортная, но:
+    // - Штраф за промах (-1) — нельзя тапать бездумно
+    // - Много ловушек — нужно выбирать камни
+    // - Камни исчезают — нужно быстро решать
+    // - Без комбо-множителей — каждый камень = 1 очко
     const PHASES = [
-        { startTime: 0,  spawnInterval: 950,  speed: 1.8, speedRamp: 0.04, stoneSize: 32, maxActive: 3,  crackChance: 0.10,  bombChance: 0,     goldenChance: 0.015, diamondChance: 0,     fadeTime: 0   },
-        { startTime: 8,  spawnInterval: 800,  speed: 2.2, speedRamp: 0.06, stoneSize: 26, maxActive: 4,  crackChance: 0.30,  bombChance: 0.10,  goldenChance: 0.01,  diamondChance: 0,     fadeTime: 3.5 },
-        { startTime: 16, spawnInterval: 700,  speed: 2.6, speedRamp: 0.08, stoneSize: 22, maxActive: 5,  crackChance: 0.38,  bombChance: 0.16,  goldenChance: 0.008, diamondChance: 0.004, fadeTime: 2.5 },
-        { startTime: 24, spawnInterval: 600,  speed: 3.0, speedRamp: 0.10, stoneSize: 19, maxActive: 6,  crackChance: 0.42,  bombChance: 0.22,  goldenChance: 0.005, diamondChance: 0.002, fadeTime: 2.0 },
+        { startTime: 0,  spawnInterval: 1000, speed: 1.6, speedRamp: 0.03, stoneSize: 30, maxActive: 3, crackChance: 0.15, bombChance: 0,    goldenChance: 0.01,  diamondChance: 0,     fadeTime: 0   },
+        { startTime: 10, spawnInterval: 850,  speed: 2.0, speedRamp: 0.05, stoneSize: 26, maxActive: 4, crackChance: 0.32, bombChance: 0.10, goldenChance: 0.008, diamondChance: 0,     fadeTime: 3.0 },
+        { startTime: 20, spawnInterval: 700,  speed: 2.4, speedRamp: 0.07, stoneSize: 22, maxActive: 5, crackChance: 0.40, bombChance: 0.18, goldenChance: 0.005, diamondChance: 0.003, fadeTime: 2.2 },
     ];
 
-    // Фазы атмосферы (цвета фона) — 4 фазы
+    // Фазы атмосферы (цвета фона) — 3 фазы
     const ATMOSPHERES = [
         { bg: ['#2c2416', '#352d20', '#2a2015'], particleColor: '#c4a882', particleCount: 40, lightRays: 2 },
         { bg: ['#2a1f2d', '#352535', '#2a2025'], particleColor: '#c0a0d0', particleCount: 55, lightRays: 3 },
         { bg: ['#301a1a', '#3a2020', '#2e1515'], particleColor: '#d0a0a0', particleCount: 70, lightRays: 3 },
-        { bg: ['#2d1020', '#3a1525', '#2e0e18'], particleColor: '#e08080', particleCount: 85, lightRays: 4 },
     ];
 
     // =====================
@@ -88,11 +87,6 @@ const Game = (() => {
     let slowmoTimer = 0;
     let slowmoFactor = 1;
 
-    // Комбо
-    let combo = 0;
-    let maxCombo = 0;
-    let comboMultiplier = 1;
-    let comboDisplayTimer = 0;
     let lastThresholdReached = 0; // для звука порога
 
     // Фон
@@ -846,6 +840,8 @@ const Game = (() => {
         const x = clientX - rect.left;
         const y = clientY - rect.top;
 
+        let hit = false;
+
         for (let i = stones.length - 1; i >= 0; i--) {
             const s = stones[i];
             if (s.caught) continue;
@@ -853,27 +849,24 @@ const Game = (() => {
             const dx = x - s.x;
             const dy = y - s.y;
             const dist = Math.sqrt(dx * dx + dy * dy);
-            const hitRadius = s.size / 2 + 4; // строгий хитбокс — нужна точность
+            const hitRadius = s.size / 2 + 6;
 
             if (dist <= hitRadius) {
                 s.caught = true;
+                hit = true;
 
                 if (s.isBomb) {
                     // БОМБА — сильный штраф!
                     score = Math.max(0, score - 3);
-                    combo = 0;
-                    comboMultiplier = 1;
                     spawnCatchParticles(s.x, s.y, '#ff2222', 20, true);
                     spawnFlash(s.x, s.y, '#ff0000');
                     spawnScoreText(s.x, s.y, '-3', false);
                     Sounds.bomb();
                     Sounds.vibrate(200);
-                    shakeAmount = 14; // сильная тряска
+                    shakeAmount = 14;
                 } else if (s.isCracked) {
                     // Треснутый камень
                     score = Math.max(0, score - 1);
-                    combo = 0;
-                    comboMultiplier = 1;
                     spawnCatchParticles(s.x, s.y, '#ff4444', 8, true);
                     spawnFlash(s.x, s.y, '#ff4444');
                     spawnScoreText(s.x, s.y, '-1', false);
@@ -881,33 +874,11 @@ const Game = (() => {
                     Sounds.vibrate(80);
                     shakeAmount = 6;
                 } else {
-                    // Хороший камень
-                    const points = s.pointValue * comboMultiplier;
+                    // Хороший камень — всегда +1 (без комбо-множителей)
+                    const points = s.pointValue;
                     score += points;
-                    combo++;
-                    if (maxCombo < combo) maxCombo = combo;
 
-                    // Комбо-система — усложнённая
-                    // x2 с 5 подряд, x3 с 10 подряд (было 3/6)
-                    let oldMultiplier = comboMultiplier;
-                    if (combo >= 10) comboMultiplier = 3;
-                    else if (combo >= 5) comboMultiplier = 2;
-                    else comboMultiplier = 1;
-
-                    if (comboMultiplier > oldMultiplier) {
-                        spawnComboText(comboMultiplier);
-                        if (comboMultiplier === 2) Sounds.combo2();
-                        if (comboMultiplier === 3) {
-                            Sounds.combo3();
-                            // Slowmo!
-                            slowmoTimer = 500; // мс
-                        }
-                    }
-
-                    // Текст очков
-                    let scoreText = '+' + points;
-                    if (comboMultiplier > 1) scoreText += ` (x${comboMultiplier})`;
-                    spawnScoreText(s.x, s.y, scoreText, true);
+                    spawnScoreText(s.x, s.y, '+' + points, true);
 
                     // Эффекты
                     const particleCount = s.type.isGolden ? 16 : s.type.isDiamond ? 24 : 10;
@@ -924,6 +895,17 @@ const Game = (() => {
                 updateHUD();
                 break;
             }
+        }
+
+        // ШТРАФ ЗА ПРОМАХ — тап мимо всех камней
+        if (!hit) {
+            score = Math.max(0, score - 1);
+            spawnScoreText(x, y, '-1', false);
+            spawnFlash(x, y, '#ff6666');
+            Sounds.miss();
+            Sounds.vibrate(40);
+            shakeAmount = 3;
+            updateHUD();
         }
     }
 
@@ -1057,8 +1039,6 @@ const Game = (() => {
         const timerEl = document.getElementById('hud-timer');
         const bestEl = document.getElementById('hud-best');
         const fillEl = document.getElementById('progress-fill');
-        const comboEl = document.getElementById('hud-combo');
-
         if (scoreEl) scoreEl.textContent = score;
         if (timerEl) {
             timerEl.textContent = Math.ceil(timeLeft);
@@ -1070,14 +1050,11 @@ const Game = (() => {
             const pct = Math.min(100, (score / MAX_SCORE_BAR) * 100);
             fillEl.style.height = pct + '%';
         }
+
+        const comboEl = document.getElementById('hud-combo');
         if (comboEl) {
-            if (comboMultiplier > 1) {
-                comboEl.textContent = `x${comboMultiplier}`;
-                comboEl.classList.add('active');
-            } else {
-                comboEl.textContent = '';
-                comboEl.classList.remove('active');
-            }
+            comboEl.textContent = '';
+            comboEl.classList.remove('active');
         }
         updateProgressMarks();
     }
@@ -1152,9 +1129,6 @@ const Game = (() => {
         shakeAmount = 0;
         slowmoTimer = 0;
         slowmoFactor = 1;
-        combo = 0;
-        maxCombo = 0;
-        comboMultiplier = 1;
         lastThresholdReached = 0;
         running = false;
 
@@ -1209,8 +1183,6 @@ const Game = (() => {
         Sounds.gameOver();
 
         const result = Prizes.recordAttempt(score);
-        result.maxCombo = maxCombo;
-        result.comboMultiplier = comboMultiplier;
 
         setTimeout(() => {
             if (onGameEnd) onGameEnd(result, braceletStones);

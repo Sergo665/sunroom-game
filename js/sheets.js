@@ -10,7 +10,7 @@ const Sheets = (() => {
     // ========================================
     // ВАЖНО: Вставьте URL вашего Google Apps Script
     // ========================================
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzJBNkAduNhtmmtYf2Si7LGWB_QE_PAuv7um5Ye0rQt0a0fwQY2X-_XePbonrDxV-Onkg/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxHUzdLK8bRLTQKniu-Rh_9asRU1H2jOS3IW71a1a1AHmGOxyWzNvdNcgwDvx1dt8XEkg/exec';
 
     /**
      * ======================================

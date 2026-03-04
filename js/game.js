@@ -42,14 +42,14 @@ const Game = (() => {
         veinColor: 'rgba(255,50,50,0.2)', glow: '#ff3333', isBomb: true,
     };
 
-    // Фазы сложности — значительно сложнее
-    // crackChance повышен, бонусы урезаны, бомбы со 2й фазы
+    // Фазы сложности — ХАРДКОР
+    // Мало камней, высокая скорость, много ловушек, точный клик
     // speedRamp — доп. ускорение внутри фазы (за каждую секунду)
     const PHASES = [
-        { startTime: 0,  spawnInterval: 750, speed: 2.2, speedRamp: 0.08, stoneSize: 32, maxActive: 4,  crackChance: 0.08,  bombChance: 0,     goldenChance: 0.02,  diamondChance: 0    },
-        { startTime: 8,  spawnInterval: 500, speed: 3.5, speedRamp: 0.12, stoneSize: 26, maxActive: 7,  crackChance: 0.22,  bombChance: 0.06,  goldenChance: 0.02,  diamondChance: 0    },
-        { startTime: 16, spawnInterval: 380, speed: 4.5, speedRamp: 0.15, stoneSize: 22, maxActive: 9,  crackChance: 0.30,  bombChance: 0.10,  goldenChance: 0.015, diamondChance: 0.008 },
-        { startTime: 24, spawnInterval: 300, speed: 5.5, speedRamp: 0.20, stoneSize: 20, maxActive: 11, crackChance: 0.35,  bombChance: 0.14,  goldenChance: 0.01,  diamondChance: 0.005 },
+        { startTime: 0,  spawnInterval: 1100, speed: 2.5, speedRamp: 0.10, stoneSize: 30, maxActive: 2,  crackChance: 0.12,  bombChance: 0,     goldenChance: 0.015, diamondChance: 0     },
+        { startTime: 8,  spawnInterval: 900,  speed: 3.8, speedRamp: 0.18, stoneSize: 25, maxActive: 3,  crackChance: 0.25,  bombChance: 0.10,  goldenChance: 0.01,  diamondChance: 0     },
+        { startTime: 16, spawnInterval: 750,  speed: 5.0, speedRamp: 0.25, stoneSize: 21, maxActive: 4,  crackChance: 0.35,  bombChance: 0.15,  goldenChance: 0.008, diamondChance: 0.004 },
+        { startTime: 24, spawnInterval: 600,  speed: 6.5, speedRamp: 0.35, stoneSize: 18, maxActive: 5,  crackChance: 0.40,  bombChance: 0.20,  goldenChance: 0.005, diamondChance: 0.002 },
     ];
 
     // Фазы атмосферы (цвета фона) — 4 фазы
@@ -341,10 +341,10 @@ const Game = (() => {
 
         if (roll < currentPhase.diamondChance) {
             type = DIAMOND_TYPE;
-            pointValue = 5;
+            pointValue = 3;
         } else if (roll < currentPhase.diamondChance + currentPhase.goldenChance) {
             type = GOLDEN_TYPE;
-            pointValue = 3;
+            pointValue = 2;
         } else if (roll < currentPhase.diamondChance + currentPhase.goldenChance + (currentPhase.bombChance || 0)) {
             type = BOMB_TYPE;
             isBomb = true;
@@ -363,13 +363,13 @@ const Game = (() => {
             x: margin / 2 + Math.random() * (width - margin),
             y: -size,
             size,
-            speed: currentPhase.speed + speedBonus + Math.random() * 1.0,
+            speed: currentPhase.speed + speedBonus + Math.random() * 1.5,
             type,
             isCracked,
             isBomb,
             pointValue,
             rotation: Math.random() * Math.PI * 2,
-            rotationSpeed: (Math.random() - 0.5) * 0.04,
+            rotationSpeed: (Math.random() - 0.5) * 0.06,
             opacity: 1,
             caught: false,
             texture,
@@ -846,7 +846,7 @@ const Game = (() => {
             const dx = x - s.x;
             const dy = y - s.y;
             const dist = Math.sqrt(dx * dx + dy * dy);
-            const hitRadius = s.size / 2 + 14;
+            const hitRadius = s.size / 2 + 4; // строгий хитбокс — нужна точность
 
             if (dist <= hitRadius) {
                 s.caught = true;
@@ -880,10 +880,11 @@ const Game = (() => {
                     combo++;
                     if (maxCombo < combo) maxCombo = combo;
 
-                    // Комбо-система
+                    // Комбо-система — усложнённая
+                    // x2 с 5 подряд, x3 с 10 подряд (было 3/6)
                     let oldMultiplier = comboMultiplier;
-                    if (combo >= 6) comboMultiplier = 3;
-                    else if (combo >= 3) comboMultiplier = 2;
+                    if (combo >= 10) comboMultiplier = 3;
+                    else if (combo >= 5) comboMultiplier = 2;
                     else comboMultiplier = 1;
 
                     if (comboMultiplier > oldMultiplier) {

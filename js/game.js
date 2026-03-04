@@ -42,14 +42,16 @@ const Game = (() => {
         veinColor: 'rgba(255,50,50,0.2)', glow: '#ff3333', isBomb: true,
     };
 
-    // Фазы сложности — ХАРДКОР
-    // Мало камней, высокая скорость, много ловушек, точный клик
-    // speedRamp — доп. ускорение внутри фазы (за каждую секунду)
+    // Фазы сложности — ХАРДКОР через ловушки, не через скорость
+    // Скорость умеренная (можно успеть нажать), но:
+    // - много крэков и бомб (нужно выбирать)
+    // - камни уменьшаются (труднее попасть)
+    // - камни исчезают (fadeTime — сек. до исчезновения, 0 = не исчезает)
     const PHASES = [
-        { startTime: 0,  spawnInterval: 1100, speed: 2.5, speedRamp: 0.10, stoneSize: 30, maxActive: 2,  crackChance: 0.12,  bombChance: 0,     goldenChance: 0.015, diamondChance: 0     },
-        { startTime: 8,  spawnInterval: 900,  speed: 3.8, speedRamp: 0.18, stoneSize: 25, maxActive: 3,  crackChance: 0.25,  bombChance: 0.10,  goldenChance: 0.01,  diamondChance: 0     },
-        { startTime: 16, spawnInterval: 750,  speed: 5.0, speedRamp: 0.25, stoneSize: 21, maxActive: 4,  crackChance: 0.35,  bombChance: 0.15,  goldenChance: 0.008, diamondChance: 0.004 },
-        { startTime: 24, spawnInterval: 600,  speed: 6.5, speedRamp: 0.35, stoneSize: 18, maxActive: 5,  crackChance: 0.40,  bombChance: 0.20,  goldenChance: 0.005, diamondChance: 0.002 },
+        { startTime: 0,  spawnInterval: 950,  speed: 1.8, speedRamp: 0.04, stoneSize: 32, maxActive: 3,  crackChance: 0.10,  bombChance: 0,     goldenChance: 0.015, diamondChance: 0,     fadeTime: 0   },
+        { startTime: 8,  spawnInterval: 800,  speed: 2.2, speedRamp: 0.06, stoneSize: 26, maxActive: 4,  crackChance: 0.30,  bombChance: 0.10,  goldenChance: 0.01,  diamondChance: 0,     fadeTime: 3.5 },
+        { startTime: 16, spawnInterval: 700,  speed: 2.6, speedRamp: 0.08, stoneSize: 22, maxActive: 5,  crackChance: 0.38,  bombChance: 0.16,  goldenChance: 0.008, diamondChance: 0.004, fadeTime: 2.5 },
+        { startTime: 24, spawnInterval: 600,  speed: 3.0, speedRamp: 0.10, stoneSize: 19, maxActive: 6,  crackChance: 0.42,  bombChance: 0.22,  goldenChance: 0.005, diamondChance: 0.002, fadeTime: 2.0 },
     ];
 
     // Фазы атмосферы (цвета фона) — 4 фазы
@@ -359,22 +361,27 @@ const Game = (() => {
         const seed = Math.floor(Math.random() * 100000);
         const texture = generateStoneTexture(type, size, isCracked, seed);
 
+        // fadeTime: камень исчезает через N секунд (мерцает перед исчезновением)
+        const fadeTime = currentPhase.fadeTime || 0;
+
         return {
             x: margin / 2 + Math.random() * (width - margin),
             y: -size,
             size,
-            speed: currentPhase.speed + speedBonus + Math.random() * 1.5,
+            speed: currentPhase.speed + speedBonus + Math.random() * 0.8,
             type,
             isCracked,
             isBomb,
             pointValue,
             rotation: Math.random() * Math.PI * 2,
-            rotationSpeed: (Math.random() - 0.5) * 0.06,
+            rotationSpeed: (Math.random() - 0.5) * 0.05,
             opacity: 1,
             caught: false,
             texture,
             seed,
-            pulsePhase: Math.random() * Math.PI * 2, // для золотых/алмазных/бомб
+            pulsePhase: Math.random() * Math.PI * 2,
+            spawnTime: Date.now(),
+            fadeTime: fadeTime, // 0 = не исчезает
         };
     }
 
@@ -962,6 +969,7 @@ const Game = (() => {
         }
 
         // Обновление камней
+        const now = Date.now();
         for (let i = stones.length - 1; i >= 0; i--) {
             const s = stones[i];
             if (s.caught) {
@@ -972,6 +980,22 @@ const Game = (() => {
             }
             s.y += s.speed * slowmoFactor;
             s.rotation += s.rotationSpeed * slowmoFactor;
+
+            // Исчезновение по времени (fadeTime)
+            if (s.fadeTime > 0) {
+                const age = (now - s.spawnTime) / 1000;
+                const fadeStart = s.fadeTime * 0.6; // начинаем мерцать на 60% времени
+                if (age >= s.fadeTime) {
+                    // Камень исчез — пропущен
+                    stones.splice(i, 1);
+                    continue;
+                } else if (age >= fadeStart) {
+                    // Мерцание — камень пульсирует, показывая что скоро исчезнет
+                    const fadeProgress = (age - fadeStart) / (s.fadeTime - fadeStart);
+                    s.opacity = 1 - fadeProgress * 0.7 + Math.sin(age * 12) * 0.15;
+                }
+            }
+
             if (s.y > height + s.size) {
                 stones.splice(i, 1);
             }

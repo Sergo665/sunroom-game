@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sunroom - Собери свой браслет!</title>
+    <meta name="description" content="Собери браслет из натуральных камней и получи подарок от Sunroom!">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- ===== SCREEN 1: LANDING ===== -->
+    <section id="screen-landing" class="screen active">
+        <div class="screen-content">
+            <div class="logo-area">
+                <div class="stone-icon">
+                    <span class="si si1"></span>
+                    <span class="si si2"></span>
+                    <span class="si si3"></span>
+                </div>
+                <h1>SUNROOM</h1>
+                <p class="tagline">Браслеты из натуральных камней</p>
+            </div>
+            <div class="landing-main">
+                <h2>Собери свой браслет<br>и получи подарок!</h2>
+                <p class="landing-desc">Лови падающие камни, собирай браслет и выиграй призы — от скидки до бесплатного браслета!</p>
+                <div class="prize-preview">
+                    <div class="prize-item"><span class="prize-dot dot-bronze"></span><span>Скидка 20%</span></div>
+                    <div class="prize-item"><span class="prize-dot dot-silver"></span><span>Скидка 50%</span></div>
+                    <div class="prize-item"><span class="prize-dot dot-gold"></span><span>Браслет в подарок</span></div>
+                    <div class="prize-item"><span class="prize-dot dot-diamond"></span><span>Бесплатный браслет!</span></div>
+                </div>
+            </div>
+            <button class="btn btn-primary" id="btn-start">Играть</button>
+        </div>
+    </section>
+
+    <!-- ===== SCREEN 2: FORM ===== -->
+    <section id="screen-form" class="screen">
+        <div class="screen-content">
+            <h2>Представьтесь</h2>
+            <p class="form-desc">Заполните данные, чтобы мы могли отправить вам приз</p>
+            <form id="user-form" novalidate>
+                <div class="form-group">
+                    <label for="user-name">Ваше имя</label>
+                    <input type="text" id="user-name" name="name" placeholder="Как вас зовут?" required autocomplete="given-name">
+                    <span class="error-msg" id="error-name"></span>
+                </div>
+                <div class="form-group">
+                    <label for="user-phone">Телефон</label>
+                    <input type="tel" id="user-phone" name="phone" placeholder="+7 (___) ___-__-__" required autocomplete="tel">
+                    <span class="error-msg" id="error-phone"></span>
+                </div>
+                <button type="submit" class="btn btn-primary">Далее</button>
+            </form>
+            <button class="btn-back" id="btn-back-form">&larr; Назад</button>
+        </div>
+    </section>
+
+    <!-- ===== SCREEN 3: RULES ===== -->
+    <section id="screen-rules" class="screen">
+        <div class="screen-content">
+            <h2>Как играть?</h2>
+            <div class="rules-list">
+                <div class="rule-item">
+                    <div class="rule-number">1</div>
+                    <p>Камни падают сверху — <strong>нажимайте</strong> на них, чтобы поймать</p>
+                </div>
+                <div class="rule-item">
+                    <div class="rule-number">2</div>
+                    <p>Пойманные камни нанизываются на <strong>браслет</strong> внизу</p>
+                </div>
+                <div class="rule-item">
+                    <div class="rule-number">3</div>
+                    <p>Осторожно! <strong>Треснутые камни</strong> отнимают очко</p>
+                </div>
+                <div class="rule-item">
+                    <div class="rule-number">4</div>
+                    <p>У вас <strong>30 секунд</strong> и <strong>3 попытки</strong> — засчитывается лучший</p>
+                </div>
+            </div>
+
+            <h3>Шкала призов</h3>
+            <div class="prize-scale">
+                <div class="scale-item scale-bronze">
+                    <div class="scale-bar"><div class="scale-fill" style="width:37%"></div></div>
+                    <div class="scale-info"><span class="scale-range">0-7 камней</span><span class="scale-prize">Скидка 20%</span></div>
+                </div>
+                <div class="scale-item scale-silver">
+                    <div class="scale-bar"><div class="scale-fill" style="width:60%"></div></div>
+                    <div class="scale-info"><span class="scale-range">8-12 камней</span><span class="scale-prize">Скидка 50%</span></div>
+                </div>
+                <div class="scale-item scale-gold">
+                    <div class="scale-bar"><div class="scale-fill" style="width:82%"></div></div>
+                    <div class="scale-info"><span class="scale-range">13-17 камней</span><span class="scale-prize">Браслет в подарок</span></div>
+                </div>
+                <div class="scale-item scale-diamond">
+                    <div class="scale-bar"><div class="scale-fill" style="width:100%"></div></div>
+                    <div class="scale-info"><span class="scale-range">18+ камней</span><span class="scale-prize">Бесплатный браслет!</span></div>
+                </div>
+            </div>
+
+            <div class="attempts-info">
+                <span>Попытки: </span>
+                <span id="attempts-display" class="attempts-dots"></span>
+            </div>
+
+            <button class="btn btn-primary btn-play" id="btn-play">Начать игру!</button>
+        </div>
+    </section>
+
+    <!-- ===== SCREEN 4: GAME ===== -->
+    <section id="screen-game" class="screen">
+        <div class="game-hud">
+            <div class="hud-item">
+                <span class="hud-label">Камни</span>
+                <span class="hud-value" id="hud-score">0</span>
+            </div>
+            <div class="hud-item hud-timer-wrap">
+                <span class="hud-label">Время</span>
+                <span class="hud-value" id="hud-timer">30</span>
+            </div>
+            <div class="hud-item">
+                <span class="hud-label">Лучший</span>
+                <span class="hud-value" id="hud-best">0</span>
+            </div>
+        </div>
+
+        <div class="game-progress">
+            <div class="progress-mark" data-threshold="18" id="mark-diamond">
+                <span class="mark-line"></span><span class="mark-label">18</span>
+            </div>
+            <div class="progress-mark" data-threshold="13" id="mark-gold">
+                <span class="mark-line"></span><span class="mark-label">13</span>
+            </div>
+            <div class="progress-mark" data-threshold="8" id="mark-silver">
+                <span class="mark-line"></span><span class="mark-label">8</span>
+            </div>
+            <div class="progress-bar-vertical">
+                <div class="progress-fill-vertical" id="progress-fill"></div>
+            </div>
+        </div>
+
+        <canvas id="game-canvas"></canvas>
+    </section>
+
+    <!-- ===== SCREEN 5: RESULT ===== -->
+    <section id="screen-result" class="screen">
+        <div class="screen-content">
+            <div class="result-bracelet" id="result-bracelet"></div>
+
+            <div id="result-content">
+                <h2 id="result-title">Отличный результат!</h2>
+                <p class="result-score">Вы собрали <strong><span id="result-score-value">0</span></strong> камней</p>
+
+                <div class="result-prize-card" id="result-prize-card">
+                    <p class="result-prize-label">Ваш приз:</p>
+                    <h3 id="result-prize-name">Скидка 20%</h3>
+                    <div class="promo-code-area">
+                        <span class="promo-label">Промокод:</span>
+                        <span class="promo-code" id="result-promo">STONE20</span>
+                        <button class="btn-copy" id="btn-copy-promo" title="Скопировать">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="result-attempts" id="result-attempts">
+                    <p>Попыток осталось: <strong id="result-attempts-left">2</strong></p>
+                    <button class="btn btn-secondary" id="btn-retry">Попробовать ещё раз</button>
+                </div>
+
+                <a href="https://vk.me/sunroom.kamni" target="_blank" class="btn btn-primary btn-shop" id="btn-shop">
+                    Забрать приз в магазине
+                </a>
+                <p class="result-hint">Назовите промокод в сообщении</p>
+            </div>
+        </div>
+    </section>
+
+    <script src="js/prizes.js"></script>
+    <script src="js/sheets.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

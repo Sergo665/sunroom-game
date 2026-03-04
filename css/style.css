@@ -350,6 +350,19 @@ form {
     padding-top: 2px;
 }
 
+.rule-number-danger {
+    background: var(--danger) !important;
+    font-size: 1rem !important;
+}
+
+.rule-danger p {
+    color: var(--danger);
+}
+
+.rule-danger p strong {
+    color: #e85555;
+}
+
 .prize-scale {
     display: flex;
     flex-direction: column;

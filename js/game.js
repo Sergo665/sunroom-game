@@ -11,7 +11,7 @@ const Game = (() => {
     // =====================
     const GAME_DURATION = 30;
     const BRACELET_HEIGHT = 80;
-    const MAX_SCORE_BAR = 22; // для прогресс-бара
+    const MAX_SCORE_BAR = 25; // для прогресс-бара
 
     // Типы камней — расширенная палитра с 3-4 цветами и прожилками
     const STONE_TYPES = [
@@ -36,19 +36,28 @@ const Game = (() => {
         name: 'Алмаз', colors: ['#ffffff', '#e0f0ff', '#a0d0ff', '#70b0e0'],
         veinColor: 'rgba(200,230,255,0.3)', glow: '#a0d0ff', isDiamond: true,
     };
+    // Бомба — тёмный камень с красным свечением
+    const BOMB_TYPE = {
+        name: 'Бомба', colors: ['#4a2020', '#301010', '#1a0808', '#0d0404'],
+        veinColor: 'rgba(255,50,50,0.2)', glow: '#ff3333', isBomb: true,
+    };
 
-    // Фазы сложности
+    // Фазы сложности — значительно сложнее
+    // crackChance повышен, бонусы урезаны, бомбы со 2й фазы
+    // speedRamp — доп. ускорение внутри фазы (за каждую секунду)
     const PHASES = [
-        { startTime: 0,  spawnInterval: 850, speed: 1.8, stoneSize: 34, maxActive: 3,  crackChance: 0,    goldenChance: 0,    diamondChance: 0    },
-        { startTime: 10, spawnInterval: 600, speed: 2.8, stoneSize: 28, maxActive: 6,  crackChance: 0.15, goldenChance: 0.04, diamondChance: 0    },
-        { startTime: 20, spawnInterval: 400, speed: 3.8, stoneSize: 23, maxActive: 9,  crackChance: 0.28, goldenChance: 0.03, diamondChance: 0.015 },
+        { startTime: 0,  spawnInterval: 750, speed: 2.2, speedRamp: 0.08, stoneSize: 32, maxActive: 4,  crackChance: 0.08,  bombChance: 0,     goldenChance: 0.02,  diamondChance: 0    },
+        { startTime: 8,  spawnInterval: 500, speed: 3.5, speedRamp: 0.12, stoneSize: 26, maxActive: 7,  crackChance: 0.22,  bombChance: 0.06,  goldenChance: 0.02,  diamondChance: 0    },
+        { startTime: 16, spawnInterval: 380, speed: 4.5, speedRamp: 0.15, stoneSize: 22, maxActive: 9,  crackChance: 0.30,  bombChance: 0.10,  goldenChance: 0.015, diamondChance: 0.008 },
+        { startTime: 24, spawnInterval: 300, speed: 5.5, speedRamp: 0.20, stoneSize: 20, maxActive: 11, crackChance: 0.35,  bombChance: 0.14,  goldenChance: 0.01,  diamondChance: 0.005 },
     ];
 
-    // Фазы атмосферы (цвета фона)
+    // Фазы атмосферы (цвета фона) — 4 фазы
     const ATMOSPHERES = [
         { bg: ['#2c2416', '#352d20', '#2a2015'], particleColor: '#c4a882', particleCount: 40, lightRays: 2 },
         { bg: ['#2a1f2d', '#352535', '#2a2025'], particleColor: '#c0a0d0', particleCount: 55, lightRays: 3 },
         { bg: ['#301a1a', '#3a2020', '#2e1515'], particleColor: '#d0a0a0', particleCount: 70, lightRays: 3 },
+        { bg: ['#2d1020', '#3a1525', '#2e0e18'], particleColor: '#e08080', particleCount: 85, lightRays: 4 },
     ];
 
     // =====================
@@ -249,7 +258,7 @@ const Game = (() => {
             oc.fillRect(cx - r - 2, cy - r - 2, r * 2 + 4, r * 2 + 4);
         }
 
-        // Золотой/алмазный свечение
+        // Золотой/алмазный/бомба свечение
         if (type.isGolden) {
             const gg = oc.createRadialGradient(cx, cy, r * 0.3, cx, cy, r);
             gg.addColorStop(0, 'rgba(255,215,0,0.2)');
@@ -263,6 +272,25 @@ const Game = (() => {
             dg.addColorStop(1, 'rgba(200,230,255,0)');
             oc.fillStyle = dg;
             oc.fillRect(cx - r - 2, cy - r - 2, r * 2 + 4, r * 2 + 4);
+        }
+        if (type.isBomb) {
+            // Красное свечение
+            const bg = oc.createRadialGradient(cx, cy, r * 0.2, cx, cy, r);
+            bg.addColorStop(0, 'rgba(255,30,30,0.35)');
+            bg.addColorStop(1, 'rgba(255,30,30,0)');
+            oc.fillStyle = bg;
+            oc.fillRect(cx - r - 2, cy - r - 2, r * 2 + 4, r * 2 + 4);
+            // Символ X на бомбе
+            oc.strokeStyle = 'rgba(255,80,80,0.6)';
+            oc.lineWidth = 2.5;
+            oc.lineCap = 'round';
+            const xr = r * 0.35;
+            oc.beginPath();
+            oc.moveTo(cx - xr, cy - xr);
+            oc.lineTo(cx + xr, cy + xr);
+            oc.moveTo(cx + xr, cy - xr);
+            oc.lineTo(cx - xr, cy + xr);
+            oc.stroke();
         }
 
         oc.restore(); // clip
@@ -303,8 +331,13 @@ const Game = (() => {
     //  СОЗДАНИЕ КАМНЯ
     // =====================
     function createStone() {
-        let type, isCracked = false, pointValue = 1;
+        let type, isCracked = false, isBomb = false, pointValue = 1;
         const roll = Math.random();
+
+        // Прогрессивное ускорение внутри фазы
+        const gameTime = GAME_DURATION - timeLeft;
+        const phaseTime = gameTime - currentPhase.startTime;
+        const speedBonus = phaseTime * (currentPhase.speedRamp || 0);
 
         if (roll < currentPhase.diamondChance) {
             type = DIAMOND_TYPE;
@@ -312,6 +345,10 @@ const Game = (() => {
         } else if (roll < currentPhase.diamondChance + currentPhase.goldenChance) {
             type = GOLDEN_TYPE;
             pointValue = 3;
+        } else if (roll < currentPhase.diamondChance + currentPhase.goldenChance + (currentPhase.bombChance || 0)) {
+            type = BOMB_TYPE;
+            isBomb = true;
+            pointValue = -3;
         } else {
             isCracked = Math.random() < currentPhase.crackChance;
             type = STONE_TYPES[Math.floor(Math.random() * STONE_TYPES.length)];
@@ -326,17 +363,18 @@ const Game = (() => {
             x: margin / 2 + Math.random() * (width - margin),
             y: -size,
             size,
-            speed: currentPhase.speed + Math.random() * 0.8,
+            speed: currentPhase.speed + speedBonus + Math.random() * 1.0,
             type,
             isCracked,
+            isBomb,
             pointValue,
             rotation: Math.random() * Math.PI * 2,
-            rotationSpeed: (Math.random() - 0.5) * 0.03,
+            rotationSpeed: (Math.random() - 0.5) * 0.04,
             opacity: 1,
             caught: false,
             texture,
             seed,
-            pulsePhase: Math.random() * Math.PI * 2, // для золотых/алмазных
+            pulsePhase: Math.random() * Math.PI * 2, // для золотых/алмазных/бомб
         };
     }
 
@@ -349,10 +387,12 @@ const Game = (() => {
         ctx.rotate(s.rotation);
         ctx.globalAlpha = s.opacity;
 
-        // Пульсация для золотых/алмазных
+        // Пульсация для золотых/алмазных/бомб
         let scale = 1;
         if (s.type.isGolden || s.type.isDiamond) {
             scale = 1 + Math.sin(elapsed * 0.005 + s.pulsePhase) * 0.06;
+        } else if (s.type.isBomb) {
+            scale = 1 + Math.sin(elapsed * 0.008 + s.pulsePhase) * 0.08;
         }
 
         const tex = s.texture;
@@ -647,7 +687,7 @@ const Game = (() => {
         ctx.restore();
 
         // Свечение при пороге
-        const currentTier = score >= 18 ? 4 : score >= 13 ? 3 : score >= 8 ? 2 : 1;
+        const currentTier = score >= 20 ? 4 : score >= 15 ? 3 : score >= 8 ? 2 : 1;
         if (currentTier > lastThresholdReached && lastThresholdReached > 0) {
             const tierColors = { 2: '#a8b5c0', 3: '#d4a04a', 4: '#7ecdc0' };
             const color = tierColors[currentTier] || '#c8956c';
@@ -811,7 +851,18 @@ const Game = (() => {
             if (dist <= hitRadius) {
                 s.caught = true;
 
-                if (s.isCracked) {
+                if (s.isBomb) {
+                    // БОМБА — сильный штраф!
+                    score = Math.max(0, score - 3);
+                    combo = 0;
+                    comboMultiplier = 1;
+                    spawnCatchParticles(s.x, s.y, '#ff2222', 20, true);
+                    spawnFlash(s.x, s.y, '#ff0000');
+                    spawnScoreText(s.x, s.y, '-3', false);
+                    Sounds.bomb();
+                    Sounds.vibrate(200);
+                    shakeAmount = 14; // сильная тряска
+                } else if (s.isCracked) {
                     // Треснутый камень
                     score = Math.max(0, score - 1);
                     combo = 0;
@@ -1007,7 +1058,7 @@ const Game = (() => {
     }
 
     function updateProgressMarks() {
-        const marks = { 'mark-silver': 8, 'mark-gold': 13, 'mark-diamond': 18 };
+        const marks = { 'mark-silver': 8, 'mark-gold': 15, 'mark-diamond': 20 };
         for (const [id, threshold] of Object.entries(marks)) {
             const el = document.getElementById(id);
             if (el) el.classList.toggle('reached', score >= threshold);
@@ -1023,7 +1074,7 @@ const Game = (() => {
         const containerRect = container.getBoundingClientRect();
         const barHeight = barRect.height;
         const barTop = barRect.top - containerRect.top;
-        const marks = { 'mark-silver': 8, 'mark-gold': 13, 'mark-diamond': 18 };
+        const marks = { 'mark-silver': 8, 'mark-gold': 15, 'mark-diamond': 20 };
         for (const [id, threshold] of Object.entries(marks)) {
             const el = document.getElementById(id);
             if (el) {

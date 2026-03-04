@@ -89,6 +89,17 @@ const Sounds = (() => {
             playNoise(0.15, 0.08);
         },
 
+        // Поймал бомбу — взрыв, низкий удар + шум
+        bomb() {
+            playTone(60, 0.4, 'sawtooth', 0.25, 0.005);
+            playTone(80, 0.3, 'square', 0.15, 0.005);
+            playNoise(0.35, 0.2);
+            setTimeout(() => {
+                playTone(40, 0.3, 'sawtooth', 0.12, 0.01);
+                playNoise(0.2, 0.1);
+            }, 80);
+        },
+
         // Комбо x2
         combo2() {
             playTone(523, 0.15, 'sine', 0.15, 0.01);

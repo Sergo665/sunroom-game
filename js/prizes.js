@@ -5,10 +5,10 @@
 const Prizes = (() => {
     // --- Настраиваемые пороги ---
     const THRESHOLDS = [
-        { min: 18, max: 999, prize: 'Бесплатный браслет!',       tier: 'diamond', codePrefix: 'FREE'  },
-        { min: 13, max: 17,  prize: 'Браслет в подарок к заказу', tier: 'gold',    codePrefix: 'GIFT'  },
-        { min: 8,  max: 12,  prize: 'Скидка 50%',                tier: 'silver',   codePrefix: 'STONE50' },
-        { min: 0,  max: 7,   prize: 'Скидка 20%',                tier: 'bronze',   codePrefix: 'STONE20' },
+        { min: 20, max: 999, prize: 'Чётки из 20 камней',            tier: 'diamond', codePrefix: 'CHETKI' },
+        { min: 15, max: 19,  prize: 'Браслет в подарок (на резинке)', tier: 'gold',    codePrefix: 'BRASLET' },
+        { min: 8,  max: 14,  prize: 'Скидка 35% на украшения',       tier: 'silver',  codePrefix: 'STONE35' },
+        { min: 0,  max: 7,   prize: 'Скидка 25% на украшения',       tier: 'bronze',  codePrefix: 'STONE25' },
     ];
 
     const MAX_ATTEMPTS = 3;

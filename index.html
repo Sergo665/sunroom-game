@@ -25,12 +25,12 @@
             </div>
             <div class="landing-main">
                 <h2>Собери свой браслет<br>и получи подарок!</h2>
-                <p class="landing-desc">Лови падающие камни, собирай браслет и выиграй призы — от скидки до бесплатного браслета!</p>
+                <p class="landing-desc">Лови падающие камни, собирай браслет и выиграй призы — от скидки до чёток из камней!</p>
                 <div class="prize-preview">
-                    <div class="prize-item"><span class="prize-dot dot-bronze"></span><span>Скидка 20%</span></div>
-                    <div class="prize-item"><span class="prize-dot dot-silver"></span><span>Скидка 50%</span></div>
+                    <div class="prize-item"><span class="prize-dot dot-bronze"></span><span>Скидка 25%</span></div>
+                    <div class="prize-item"><span class="prize-dot dot-silver"></span><span>Скидка 35%</span></div>
                     <div class="prize-item"><span class="prize-dot dot-gold"></span><span>Браслет в подарок</span></div>
-                    <div class="prize-item"><span class="prize-dot dot-diamond"></span><span>Бесплатный браслет!</span></div>
+                    <div class="prize-item"><span class="prize-dot dot-diamond"></span><span>Чётки из 20 камней!</span></div>
                 </div>
             </div>
             <button class="btn btn-primary" id="btn-start">Играть</button>
@@ -78,7 +78,11 @@
                 </div>
                 <div class="rule-item">
                     <div class="rule-number">4</div>
-                    <p>Ищите редкие <strong>золотые</strong> (+3) и <strong>алмазные</strong> (+5) камни!</p>
+                    <p>Ищите <strong>золотые</strong> (+3) и <strong>алмазные</strong> (+5) камни!</p>
+                </div>
+                <div class="rule-item rule-danger">
+                    <div class="rule-number rule-number-danger">!</div>
+                    <p>Остерегайтесь <strong>тёмных камней-бомб</strong> — это <strong>-3 очка!</strong> Скорость растёт с каждой секундой</p>
                 </div>
                 <div class="rule-item">
                     <div class="rule-number">5</div>
@@ -89,20 +93,20 @@
             <h3>Шкала призов</h3>
             <div class="prize-scale">
                 <div class="scale-item scale-bronze">
-                    <div class="scale-bar"><div class="scale-fill" style="width:37%"></div></div>
-                    <div class="scale-info"><span class="scale-range">0-7 камней</span><span class="scale-prize">Скидка 20%</span></div>
+                    <div class="scale-bar"><div class="scale-fill" style="width:35%"></div></div>
+                    <div class="scale-info"><span class="scale-range">0-7 камней</span><span class="scale-prize">Скидка 25%</span></div>
                 </div>
                 <div class="scale-item scale-silver">
-                    <div class="scale-bar"><div class="scale-fill" style="width:60%"></div></div>
-                    <div class="scale-info"><span class="scale-range">8-12 камней</span><span class="scale-prize">Скидка 50%</span></div>
+                    <div class="scale-bar"><div class="scale-fill" style="width:56%"></div></div>
+                    <div class="scale-info"><span class="scale-range">8-14 камней</span><span class="scale-prize">Скидка 35%</span></div>
                 </div>
                 <div class="scale-item scale-gold">
-                    <div class="scale-bar"><div class="scale-fill" style="width:82%"></div></div>
-                    <div class="scale-info"><span class="scale-range">13-17 камней</span><span class="scale-prize">Браслет в подарок</span></div>
+                    <div class="scale-bar"><div class="scale-fill" style="width:76%"></div></div>
+                    <div class="scale-info"><span class="scale-range">15-19 камней</span><span class="scale-prize">Браслет на резинке</span></div>
                 </div>
                 <div class="scale-item scale-diamond">
                     <div class="scale-bar"><div class="scale-fill" style="width:100%"></div></div>
-                    <div class="scale-info"><span class="scale-range">18+ камней</span><span class="scale-prize">Бесплатный браслет!</span></div>
+                    <div class="scale-info"><span class="scale-range">20+ камней</span><span class="scale-prize">Чётки из 20 камней!</span></div>
                 </div>
             </div>
 
@@ -134,11 +138,11 @@
         </div>
 
         <div class="game-progress">
-            <div class="progress-mark" data-threshold="18" id="mark-diamond">
-                <span class="mark-line"></span><span class="mark-label">18</span>
+            <div class="progress-mark" data-threshold="20" id="mark-diamond">
+                <span class="mark-line"></span><span class="mark-label">20</span>
             </div>
-            <div class="progress-mark" data-threshold="13" id="mark-gold">
-                <span class="mark-line"></span><span class="mark-label">13</span>
+            <div class="progress-mark" data-threshold="15" id="mark-gold">
+                <span class="mark-line"></span><span class="mark-label">15</span>
             </div>
             <div class="progress-mark" data-threshold="8" id="mark-silver">
                 <span class="mark-line"></span><span class="mark-label">8</span>

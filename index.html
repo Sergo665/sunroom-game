@@ -70,14 +70,18 @@
                 </div>
                 <div class="rule-item">
                     <div class="rule-number">2</div>
-                    <p>Пойманные камни нанизываются на <strong>браслет</strong> внизу</p>
+                    <p>Пойманные камни летят на <strong>браслет</strong> внизу экрана</p>
                 </div>
                 <div class="rule-item">
                     <div class="rule-number">3</div>
-                    <p>Осторожно! <strong>Треснутые камни</strong> отнимают очко</p>
+                    <p>Ловите подряд для <strong>комбо x2 и x3!</strong> Треснутые камни сбрасывают комбо</p>
                 </div>
                 <div class="rule-item">
                     <div class="rule-number">4</div>
+                    <p>Ищите редкие <strong>золотые</strong> (+3) и <strong>алмазные</strong> (+5) камни!</p>
+                </div>
+                <div class="rule-item">
+                    <div class="rule-number">5</div>
                     <p>У вас <strong>30 секунд</strong> и <strong>3 попытки</strong> — засчитывается лучший</p>
                 </div>
             </div>
@@ -117,6 +121,7 @@
             <div class="hud-item">
                 <span class="hud-label">Камни</span>
                 <span class="hud-value" id="hud-score">0</span>
+                <span class="hud-combo" id="hud-combo"></span>
             </div>
             <div class="hud-item hud-timer-wrap">
                 <span class="hud-label">Время</span>
@@ -154,6 +159,7 @@
             <div id="result-content">
                 <h2 id="result-title">Отличный результат!</h2>
                 <p class="result-score">Вы собрали <strong><span id="result-score-value">0</span></strong> камней</p>
+                <p class="result-combo" id="result-combo-info"></p>
 
                 <div class="result-prize-card" id="result-prize-card">
                     <p class="result-prize-label">Ваш приз:</p>
@@ -184,6 +190,7 @@
     </section>
 
     <script src="js/prizes.js"></script>
+    <script src="js/sounds.js"></script>
     <script src="js/sheets.js"></script>
     <script src="js/game.js"></script>
     <script src="js/app.js"></script>

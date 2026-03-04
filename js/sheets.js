@@ -1,71 +1,72 @@
 /* ========================================
    SUNROOM — Отправка в Google Sheets
+   Через Google Apps Script (безопасно)
    ======================================== */
 
 const Sheets = (() => {
     // ========================================
-    // ВАЖНО: Вставьте сюда URL вашего Google Apps Script
-    // Инструкция ниже в комментариях
+    // ВАЖНО: Вставьте URL вашего Google Apps Script
     // ========================================
     const APPS_SCRIPT_URL = '';
 
     /**
-     * Инструкция по настройке Google Sheets:
+     * ======================================
+     * ИНСТРУКЦИЯ ПО НАСТРОЙКЕ
+     * ======================================
      *
-     * 1. Создайте новую Google таблицу: https://sheets.new
+     * Ваша таблица: https://docs.google.com/spreadsheets/d/1owsjWks5KAsiGUwCpCqWe39rJkuoUWHXqYBTldQaWy0/
+     * Лист: "Игры"
      *
-     * 2. Назовите первый лист "Лиды" (или любое имя)
+     * ШАГ 1: Откройте таблицу, затем: Расширения → Apps Script
      *
-     * 3. В первую строку добавьте заголовки:
-     *    A1: Дата | B1: Имя | C1: Телефон | D1: Очки | E1: Приз | F1: Промокод
+     * ШАГ 2: Удалите весь код и вставьте:
      *
-     * 4. Откройте: Расширения → Apps Script
+     *   function doPost(e) {
+     *     var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Игры');
+     *     var data = JSON.parse(e.postData.contents);
+     *     sheet.appendRow([
+     *       data.date,
+     *       data.name,
+     *       data.phone,
+     *       data.score,
+     *       data.prize,
+     *       data.promoCode
+     *     ]);
+     *     return ContentService.createTextOutput(
+     *       JSON.stringify({status: 'ok'})
+     *     ).setMimeType(ContentService.MimeType.JSON);
+     *   }
      *
-     * 5. Замените содержимое на:
+     * ШАГ 3: Нажмите "Развернуть" → "Новое развертывание"
+     *   - Тип: Веб-приложение
+     *   - Выполнять как: Я
+     *   - Доступ: Все
      *
-     *    function doPost(e) {
-     *      var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-     *      var data = JSON.parse(e.postData.contents);
-     *      sheet.appendRow([
-     *        data.date,
-     *        data.name,
-     *        data.phone,
-     *        data.score,
-     *        data.prize,
-     *        data.promoCode
-     *      ]);
-     *      return ContentService.createTextOutput(
-     *        JSON.stringify({status: 'ok'})
-     *      ).setMimeType(ContentService.MimeType.JSON);
-     *    }
+     * ШАГ 4: Скопируйте URL и вставьте в APPS_SCRIPT_URL выше
      *
-     * 6. Нажмите "Развернуть" → "Новое развертывание"
-     *    - Тип: Веб-приложение
-     *    - Выполнять как: Я
-     *    - Доступ: Все
+     * ШАГ 5: Убедитесь, что в таблице на листе "Игры" есть заголовки:
+     *   A1: Дата | B1: Имя | C1: Телефон | D1: Очки | E1: Приз | F1: Промокод
      *
-     * 7. Скопируйте URL развертывания и вставьте в APPS_SCRIPT_URL выше
+     * ======================================
      */
 
     async function submit(data) {
         if (!APPS_SCRIPT_URL) {
-            console.warn('[Sheets] APPS_SCRIPT_URL не настроен. Данные не отправлены:', data);
+            console.warn('[Sheets] APPS_SCRIPT_URL не настроен. Данные:', data);
             return { success: false, reason: 'URL не настроен' };
         }
 
         try {
-            const response = await fetch(APPS_SCRIPT_URL, {
+            await fetch(APPS_SCRIPT_URL, {
                 method: 'POST',
-                mode: 'no-cors', // Apps Script не поддерживает CORS для POST
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data),
             });
             console.log('[Sheets] Данные отправлены:', data);
             return { success: true };
         } catch (err) {
-            console.error('[Sheets] Ошибка отправки:', err);
+            console.error('[Sheets] Ошибка:', err);
             return { success: false, reason: err.message };
         }
     }

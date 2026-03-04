@@ -1,10 +1,10 @@
 /* ========================================
-   SUNROOM — Контроллер приложения
-   Управление экранами, форма, результаты
+   SUNROOM — Контроллер приложения v2
+   Управление экранами, форма, результаты,
+   комбо-информация
    ======================================== */
 
 const App = (() => {
-    // --- Экраны ---
     const screens = {
         landing: document.getElementById('screen-landing'),
         form: document.getElementById('screen-form'),
@@ -24,8 +24,6 @@ const App = (() => {
         const phoneInput = document.getElementById('user-phone');
         phoneInput.addEventListener('input', (e) => {
             let val = e.target.value.replace(/\D/g, '');
-
-            // Убираем ведущую 8 или 7, нормализуем к 7
             if (val.startsWith('8')) val = '7' + val.slice(1);
             if (!val.startsWith('7') && val.length > 0) val = '7' + val;
 
@@ -40,7 +38,6 @@ const App = (() => {
             e.target.value = formatted;
         });
 
-        // Начальное значение
         phoneInput.addEventListener('focus', (e) => {
             if (!e.target.value) e.target.value = '+7 (';
         });
@@ -54,7 +51,6 @@ const App = (() => {
         const errorPhone = document.getElementById('error-phone');
         let valid = true;
 
-        // Имя
         const name = nameInput.value.trim();
         if (!name || name.length < 2) {
             nameInput.classList.add('invalid');
@@ -65,7 +61,6 @@ const App = (() => {
             errorName.textContent = '';
         }
 
-        // Телефон
         const phone = phoneInput.value.replace(/\D/g, '');
         if (phone.length < 11) {
             phoneInput.classList.add('invalid');
@@ -79,11 +74,10 @@ const App = (() => {
         return valid ? { name, phone: phoneInput.value } : null;
     }
 
-    // --- Обновление попыток на экране правил ---
+    // --- Попытки ---
     function updateAttemptsDisplay() {
         const container = document.getElementById('attempts-display');
         if (!container) return;
-        const left = Prizes.getAttemptsLeft();
         const used = Prizes.getAttemptsUsed();
         container.innerHTML = '';
 
@@ -110,19 +104,31 @@ const App = (() => {
         document.getElementById('result-prize-name').textContent = result.prize;
         document.getElementById('result-promo').textContent = result.promoCode;
 
+        // Комбо информация
+        const comboEl = document.getElementById('result-combo-info');
+        if (comboEl) {
+            if (result.maxCombo && result.maxCombo >= 3) {
+                comboEl.textContent = `Макс. комбо: ${result.maxCombo} подряд`;
+                comboEl.style.display = 'block';
+            } else {
+                comboEl.style.display = 'none';
+            }
+        }
+
         // Стиль карточки приза
         const card = document.getElementById('result-prize-card');
         card.className = 'result-prize-card tier-' + result.tier;
 
-        // Браслет из камней (анимация)
+        // Браслет из камней
         const braceletEl = document.getElementById('result-bracelet');
         braceletEl.innerHTML = '';
         if (braceletStonesData && braceletStonesData.length > 0) {
             braceletStonesData.forEach((type, i) => {
                 const stone = document.createElement('span');
                 stone.className = 'result-stone';
-                stone.style.background = `linear-gradient(135deg, ${type.colors[0]}, ${type.colors[1]})`;
-                stone.style.animationDelay = (i * 0.05) + 's';
+                const c = type.colors || ['#888', '#666', '#444'];
+                stone.style.background = `radial-gradient(circle at 35% 35%, ${c[0]}, ${c[1]}, ${c[2]})`;
+                stone.style.animationDelay = (i * 0.04) + 's';
                 braceletEl.appendChild(stone);
             });
         }
@@ -137,7 +143,7 @@ const App = (() => {
             attemptsSection.classList.add('hidden');
         }
 
-        // Отправляем данные в Google Sheets (только если все попытки использованы или ещё не отправляли)
+        // Отправка в Google Sheets
         if (Prizes.isGameOver() && !Prizes.isDataSent()) {
             const data = Prizes.getSubmitData();
             Sheets.submit(data).then(() => {
@@ -157,7 +163,6 @@ const App = (() => {
                     setTimeout(() => btn.classList.remove('copied'), 1500);
                 });
             } else {
-                // Fallback
                 const textarea = document.createElement('textarea');
                 textarea.value = code;
                 document.body.appendChild(textarea);
@@ -171,7 +176,6 @@ const App = (() => {
     // --- Запуск игры ---
     function startGame() {
         showScreen('game');
-        // Небольшая задержка, чтобы экран отрисовался
         setTimeout(() => {
             Game.start((result, braceletStonesData) => {
                 showResult(result, braceletStonesData);
@@ -181,19 +185,13 @@ const App = (() => {
 
     // --- Инициализация ---
     function init() {
-        // Инициализация Canvas
         Game.init(document.getElementById('game-canvas'));
-
-        // Маска телефона
         setupPhoneMask();
-
-        // Копирование промокода
         setupCopyButton();
-
-        // --- Кнопки ---
 
         // Лендинг → Форма
         document.getElementById('btn-start').addEventListener('click', () => {
+            Sounds.init(); // Инициализация AudioContext при первом клике
             showScreen('form');
         });
 
@@ -202,7 +200,7 @@ const App = (() => {
             showScreen('landing');
         });
 
-        // Форма → Правила (с валидацией)
+        // Форма → Правила
         document.getElementById('user-form').addEventListener('submit', (e) => {
             e.preventDefault();
             const data = validateForm();
@@ -218,32 +216,28 @@ const App = (() => {
             startGame();
         });
 
-        // Результат → Повторная игра
+        // Результат → Повтор
         document.getElementById('btn-retry').addEventListener('click', () => {
             updateAttemptsDisplay();
             showScreen('rules');
         });
 
-        // Проверяем, если пользователь уже играл ранее
+        // Восстановление сессии
         if (Prizes.isGameOver()) {
-            // Все попытки использованы — показываем результат
             const result = Prizes.getResult();
             showResult(result, []);
         } else if (Prizes.getAttemptsUsed() > 0) {
-            // Есть незавершённые попытки — показываем правила
             updateAttemptsDisplay();
-            // Но нужны данные пользователя
             const userData = Prizes.getUserData();
             if (userData.name && userData.phone) {
                 showScreen('rules');
             }
         }
 
-        console.log('[Sunroom] Game initialized');
+        console.log('[Sunroom] Game v2 initialized');
         console.log('[Sunroom] Для сброса: Prizes.reset() в консоли');
     }
 
-    // Запускаем после загрузки DOM
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', init);
     } else {

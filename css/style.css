@@ -1,6 +1,6 @@
 /* ========================================
-   SUNROOM — Собери браслет: Стили
-   Природный / эко дизайн
+   SUNROOM — Собери браслет: Стили v2
+   Природный / эко дизайн + геймплей
    ======================================== */
 
 /* --- CSS Variables --- */
@@ -181,26 +181,29 @@ p {
 }
 
 .si {
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
     border-radius: 50%;
     display: inline-block;
     animation: float 3s ease-in-out infinite;
+    box-shadow: 0 0 12px rgba(155, 89, 182, 0.3);
 }
 
 .si1 {
-    background: linear-gradient(135deg, #9b59b6, #6c3483);
+    background: radial-gradient(circle at 30% 30%, #c39bd3, #9b59b6, #6c3483);
     animation-delay: 0s;
 }
 
 .si2 {
-    background: linear-gradient(135deg, #c8956c, #8b6914);
+    background: radial-gradient(circle at 30% 30%, #e0c080, #c8956c, #8b6914);
     animation-delay: 0.5s;
+    box-shadow: 0 0 12px rgba(200, 149, 108, 0.3);
 }
 
 .si3 {
-    background: linear-gradient(135deg, #3498db, #1a5276);
+    background: radial-gradient(circle at 30% 30%, #5dade2, #2e86c1, #1a5276);
     animation-delay: 1s;
+    box-shadow: 0 0 12px rgba(46, 134, 193, 0.3);
 }
 
 @keyframes float {
@@ -245,16 +248,17 @@ p {
 }
 
 .prize-dot {
-    width: 12px;
-    height: 12px;
+    width: 14px;
+    height: 14px;
     border-radius: 50%;
     flex-shrink: 0;
+    box-shadow: 0 0 6px rgba(0,0,0,0.2);
 }
 
-.dot-bronze { background: var(--bronze); }
-.dot-silver { background: var(--silver); }
-.dot-gold { background: var(--gold); }
-.dot-diamond { background: var(--diamond); }
+.dot-bronze { background: radial-gradient(circle at 35% 35%, #d49050, var(--bronze), #805020); }
+.dot-silver { background: radial-gradient(circle at 35% 35%, #c8d5e0, var(--silver), #708090); }
+.dot-gold { background: radial-gradient(circle at 35% 35%, #f0d070, var(--gold), #a07020); }
+.dot-diamond { background: radial-gradient(circle at 35% 35%, #a0e8d8, var(--diamond), #40a090); }
 
 /* ===== SCREEN 2: FORM ===== */
 .form-desc {
@@ -346,7 +350,6 @@ form {
     padding-top: 2px;
 }
 
-/* Prize scale */
 .prize-scale {
     display: flex;
     flex-direction: column;
@@ -372,10 +375,10 @@ form {
     transition: width 0.5s ease;
 }
 
-.scale-bronze .scale-fill { background: var(--bronze); }
-.scale-silver .scale-fill { background: var(--silver); }
-.scale-gold .scale-fill { background: var(--gold); }
-.scale-diamond .scale-fill { background: var(--diamond); }
+.scale-bronze .scale-fill { background: linear-gradient(90deg, var(--bronze), #d49050); }
+.scale-silver .scale-fill { background: linear-gradient(90deg, var(--silver), #c8d5e0); }
+.scale-gold .scale-fill { background: linear-gradient(90deg, var(--gold), #f0d070); }
+.scale-diamond .scale-fill { background: linear-gradient(90deg, var(--diamond), #a0e8d8); }
 
 .scale-info {
     display: flex;
@@ -386,7 +389,6 @@ form {
 .scale-range { color: var(--text-muted); }
 .scale-prize { color: var(--text-secondary); font-weight: 600; }
 
-/* Attempts */
 .attempts-info {
     margin-bottom: 20px;
     font-size: 0.9rem;
@@ -412,6 +414,7 @@ form {
 
 .attempt-dot.full {
     background: var(--accent);
+    box-shadow: 0 0 6px rgba(200, 149, 108, 0.4);
 }
 
 .attempt-dot.used {
@@ -440,6 +443,7 @@ form {
     right: 0;
     display: flex;
     justify-content: space-between;
+    align-items: flex-start;
     padding: 12px 16px;
     background: linear-gradient(180deg, rgba(44, 36, 22, 0.95) 0%, rgba(44, 36, 22, 0) 100%);
     z-index: 20;
@@ -449,10 +453,11 @@ form {
     display: flex;
     flex-direction: column;
     align-items: center;
+    min-width: 50px;
 }
 
 .hud-label {
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -477,6 +482,28 @@ form {
 @keyframes pulse {
     from { opacity: 1; }
     to { opacity: 0.5; }
+}
+
+/* Combo HUD */
+.hud-combo {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--gold);
+    min-height: 20px;
+    transition: all 0.2s ease;
+    opacity: 0;
+    transform: scale(0.5);
+}
+
+.hud-combo.active {
+    opacity: 1;
+    transform: scale(1);
+    animation: comboPulse 0.6s ease infinite alternate;
+}
+
+@keyframes comboPulse {
+    from { text-shadow: 0 0 4px rgba(212, 160, 74, 0.3); }
+    to { text-shadow: 0 0 12px rgba(212, 160, 74, 0.7); }
 }
 
 /* Vertical progress bar */
@@ -518,12 +545,14 @@ form {
     display: flex;
     align-items: center;
     gap: 2px;
+    transition: all 0.3s ease;
 }
 
 .mark-line {
     width: 12px;
     height: 2px;
     background: var(--text-muted);
+    transition: background 0.3s ease;
 }
 
 .mark-label {
@@ -531,11 +560,18 @@ form {
     color: var(--text-muted);
     width: 16px;
     text-align: right;
+    transition: all 0.3s ease;
 }
 
 .progress-mark.reached .mark-label {
     color: var(--accent);
     font-weight: 700;
+    text-shadow: 0 0 6px rgba(200, 149, 108, 0.5);
+}
+
+.progress-mark.reached .mark-line {
+    background: var(--accent);
+    box-shadow: 0 0 4px rgba(200, 149, 108, 0.5);
 }
 
 /* Canvas */
@@ -567,18 +603,25 @@ form {
     height: 22px;
     border-radius: 50%;
     animation: popIn 0.3s ease backwards;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), inset 0 -2px 4px rgba(0,0,0,0.15);
 }
 
 @keyframes popIn {
-    from { transform: scale(0); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
+    from { transform: scale(0) rotate(-30deg); opacity: 0; }
+    to { transform: scale(1) rotate(0deg); opacity: 1; }
 }
 
 .result-score {
     font-size: 1.1rem;
-    margin-bottom: 16px;
+    margin-bottom: 8px;
     color: var(--text-secondary);
+}
+
+.result-combo {
+    font-size: 0.9rem;
+    color: var(--gold);
+    margin-bottom: 16px;
+    opacity: 0.8;
 }
 
 .result-prize-card {
@@ -587,12 +630,25 @@ form {
     border-radius: var(--radius);
     padding: 20px;
     margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+.result-prize-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.03) 0%, transparent 60%);
+    pointer-events: none;
 }
 
 .result-prize-card.tier-bronze { border-color: var(--bronze); }
 .result-prize-card.tier-silver { border-color: var(--silver); }
-.result-prize-card.tier-gold { border-color: var(--gold); }
-.result-prize-card.tier-diamond { border-color: var(--diamond); }
+.result-prize-card.tier-gold { border-color: var(--gold); box-shadow: 0 0 20px rgba(212, 160, 74, 0.15); }
+.result-prize-card.tier-diamond { border-color: var(--diamond); box-shadow: 0 0 25px rgba(126, 205, 192, 0.2); }
 
 .result-prize-label {
     font-size: 0.85rem;
@@ -665,9 +721,7 @@ form {
 
 /* ===== RESPONSIVE ===== */
 @media (max-height: 650px) {
-    .screen-content {
-        padding: 16px 16px;
-    }
+    .screen-content { padding: 16px 16px; }
     h1 { font-size: 1.8rem; }
     h2 { font-size: 1.25rem; }
     .landing-main h2 { font-size: 1.2rem; }
@@ -686,40 +740,6 @@ form {
 /* ===== UTILITIES ===== */
 .hidden { display: none !important; }
 
-/* Catch effect */
-.catch-effect {
-    position: absolute;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 15;
-    animation: catchBurst 0.4s ease-out forwards;
-}
-
-@keyframes catchBurst {
-    0% { transform: scale(0.5); opacity: 0.8; }
-    100% { transform: scale(2); opacity: 0; }
-}
-
-.score-popup {
-    position: absolute;
-    font-family: var(--font);
-    font-size: 1.2rem;
-    font-weight: 700;
-    pointer-events: none;
-    z-index: 15;
-    animation: scoreFloat 0.7s ease-out forwards;
-}
-
-.score-popup.positive { color: var(--success); }
-.score-popup.negative { color: var(--danger); }
-
-@keyframes scoreFloat {
-    0% { transform: translateY(0); opacity: 1; }
-    100% { transform: translateY(-40px); opacity: 0; }
-}
-
 /* Countdown overlay */
 .countdown-overlay {
     position: fixed;
@@ -730,7 +750,7 @@ form {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(44, 36, 22, 0.8);
+    background: rgba(44, 36, 22, 0.85);
     z-index: 30;
 }
 
@@ -739,6 +759,12 @@ form {
     font-weight: 700;
     color: var(--accent);
     animation: countdownPop 0.8s ease forwards;
+    text-shadow: 0 0 30px rgba(200, 149, 108, 0.4);
+}
+
+.countdown-number.go {
+    color: var(--success);
+    text-shadow: 0 0 30px rgba(106, 191, 105, 0.4);
 }
 
 @keyframes countdownPop {

@@ -77,20 +77,10 @@ const Sheets = (() => {
         const url = buildUrl(data);
         console.log('[Sheets] Отправка данных:', data);
 
-        // Метод 1: Image GET — пуленепробиваемый, работает везде
-        try {
-            const img = new Image();
-            img.onload = () => console.log('[Sheets] OK (img)');
-            img.onerror = () => console.log('[Sheets] img завершён (может быть ок — ответ не картинка)');
-            img.src = url;
-        } catch (e) {
-            console.warn('[Sheets] img ошибка:', e);
-        }
-
-        // Метод 2: fetch no-cors — не узнаем результат, но запрос уйдёт
+        // Один запрос через fetch
         return fetch(url, { mode: 'no-cors', cache: 'no-store' })
             .then(() => {
-                console.log('[Sheets] OK (fetch)');
+                console.log('[Sheets] OK');
                 return { success: true };
             })
             .catch(err => {
